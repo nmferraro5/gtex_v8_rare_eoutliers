@@ -1,0 +1,96 @@
+#!/usr/bin/env Rscript
+
+rm(list = ls())
+
+require(data.table)
+require(dplyr)
+require(plyr)
+
+#-------------- MAIN
+
+args = commandArgs(trailingOnly = T)
+if (length(args) != 6) {
+  cat("Usage: Rscript calculate_PEER_residuals.R RPKM COV PEER EQTLCALLS EQTLGENOS OUT\n", file = stderr())
+  quit(status = 2)
+}
+
+## Define arguments
+expr_file = args[1]
+covs_file = args[2]
+peer_file = args[3]
+eqtl_call_file = args[4]
+eqtl_geno_file = args[5]
+out_file = args[6]
+
+#expr_file = '/srv/scratch/restricted/GOATs/preprocessing/PEER_v7/Whole_Blood.rpkm.log2.ztrans.txt' 
+#covs_file = '/srv/scratch/restricted/GOATs/preprocessing/PEER_v7/covariates.txt'
+#peer_file = '/srv/scratch/restricted/GOATs/preprocessing/PEER_v7/Whole_Blood_Factors35/factors.tsv'
+#eqtl_call_file = '/mnt/lab_data/montgomery/shared/datasets/gtex/GTEx_Analysis_2015-01-12/eqtl_updated_annotation/v6p_fastQTL_FOR_QC_ONLY/Whole_Blood_Analysis.v6p.FOR_QC_ONLY.egenes.txt.gz'
+#eqtl_geno_file = '/srv/scratch/restricted/GOATs/preprocessing/gtex_2016-01-15_v7_genotypes_v6p_cis_eQTLs_012_processed.txt'
+#out_file = '/srv/scratch/restricted/GOATs/preprocessing/PEER_v7/Whole_Blood.peer.v6pciseQTLs.ztrans.txt'
+
+## Read in expression and covariate matrices
+expr = read.table(expr_file, header = T, sep = '\t', row.names = 1)
+covs = read.table(covs_file, header = T, sep = '\t', row.names = 1)
+
+global_outliers = fread('/users/nferraro/data/goats_data/v8_data/gtexV8_global_outliers_medz3_iqr.txt', header=F)
+kinds = which(!(rownames(expr) %in% global_outliers$V1))
+expr = expr[kinds,]
+
+## Reorder and subset rows in covariates file to match expression matrix rows
+## Also only keep first 3 genotype PCs and sex (if applicable)
+covs = covs[rownames(expr), ]
+remove.cols = paste0('C', 4:20)
+covs = covs[, !(colnames(covs) %in% remove.cols)]
+
+## Read in PEER factors, fix subject names, and make column order match expression rows
+peer = t(read.table(peer_file, header = T, sep = '\t', row.names = 1))
+rownames(peer) = gsub('\\.', '-', rownames(peer))
+peer = peer[rownames(expr), ]
+
+## Combine covariates and PEER factors
+#num_keep = round(0.5*ncol(peer))
+#peer = peer[,1:num_keep]
+covs = cbind(covs, peer)
+
+## Remove individuals with missing covariates
+inds_to_keep = rowSums(is.na(covs)) == 0
+covs = covs[inds_to_keep, ]
+expr = expr[inds_to_keep, ]
+
+## Read in eQTL data for this tissue
+## Restrict to the individuals with expression data for this tissue
+eqtl_calls = read.table(eqtl_call_file, sep = '\t', header = T) %>% select(Gene = gene_id, Chrom = chr, Pos = variant_pos, Qval = qval)
+eqtl_genos = as.data.frame(fread(eqtl_geno_file))
+
+eqtl_genos = eqtl_genos %>% select(c('Chrom', 'Pos', rownames(expr))) %>%
+			merge(., eqtl_calls)
+
+## For each gene in the expression file, perform a linear regression 
+## Keep residuals
+resids = matrix(, ncol = ncol(expr), nrow = nrow(expr))
+rownames(resids) = rownames(expr)
+colnames(resids) = colnames(expr)
+
+for(i in 1:ncol(expr)){
+	print(i)
+	gene = names(expr)[i]
+	data = as.data.frame(cbind(expr[, i], covs))
+	colnames(data) = c('RPKM', colnames(covs))
+	if(gene %in% eqtl_genos$Gene){
+		genos = eqtl_genos %>% filter(Gene == gene) %>% select(rownames(expr)) %>% t()		
+		mean.geno = mean(genos, na.rm = T)
+		genos = ifelse(is.na(genos), mean.geno, genos)
+		data = cbind(data, genos)
+		colnames(data)[ncol(data)] = 'EQTL'
+	}
+	model = lm(RPKM ~ ., data = data)
+	resids[, i] = model$residuals
+}
+
+# Center and scale, then transpose
+resids = t(scale(resids))
+
+# Write out the residuals
+write.table(matrix(c('Id', colnames(resids)), nrow = 1), out_file, quote = F, row.names = F, col.names = F, sep = '\t')
+write.table(resids, out_file, row.names = T, col.names = F, quote = F, sep = '\t', append = T)
