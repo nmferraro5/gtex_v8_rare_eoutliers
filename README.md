@@ -4,7 +4,7 @@ GTEx v8 Outlier Analysis
 Setup
 -----
 First set paths in `paths`.  
-Then run (or better yet, also add to your .bashrc):
+Then run to access the path variables:
 ```
 source <path to repo>/paths
 ```
@@ -30,3 +30,4 @@ Data processing and Analysis
 [Data correction, transformation, and reorganization](correction.md)  
 [Feature construction](features.md)  
 [Imputation and outlier calling](outlier_calling.md)  
+[Rare variant enrichments](enrichment.md)  
