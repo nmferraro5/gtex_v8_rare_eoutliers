@@ -1,4 +1,4 @@
-Gene Expression Across Things (GOATs) - v2 
+GTEx v8 Outlier Analysis 
 =====================================
 
 Setup
