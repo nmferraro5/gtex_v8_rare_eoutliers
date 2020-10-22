@@ -22,25 +22,14 @@ eqtl_call_file = args[4]
 eqtl_geno_file = args[5]
 out_file = args[6]
 
-#expr_file = '/srv/scratch/restricted/GOATs/preprocessing/PEER_v7/Whole_Blood.rpkm.log2.ztrans.txt' 
-#covs_file = '/srv/scratch/restricted/GOATs/preprocessing/PEER_v7/covariates.txt'
-#peer_file = '/srv/scratch/restricted/GOATs/preprocessing/PEER_v7/Whole_Blood_Factors35/factors.tsv'
-#eqtl_call_file = '/mnt/lab_data/montgomery/shared/datasets/gtex/GTEx_Analysis_2015-01-12/eqtl_updated_annotation/v6p_fastQTL_FOR_QC_ONLY/Whole_Blood_Analysis.v6p.FOR_QC_ONLY.egenes.txt.gz'
-#eqtl_geno_file = '/srv/scratch/restricted/GOATs/preprocessing/gtex_2016-01-15_v7_genotypes_v6p_cis_eQTLs_012_processed.txt'
-#out_file = '/srv/scratch/restricted/GOATs/preprocessing/PEER_v7/Whole_Blood.peer.v6pciseQTLs.ztrans.txt'
-
 ## Read in expression and covariate matrices
 expr = read.table(expr_file, header = T, sep = '\t', row.names = 1)
 covs = read.table(covs_file, header = T, sep = '\t', row.names = 1)
 
-global_outliers = fread('/users/nferraro/data/goats_data/v8_data/gtexV8_global_outliers_medz3_iqr.txt', header=F)
-kinds = which(!(rownames(expr) %in% global_outliers$V1))
-expr = expr[kinds,]
-
 ## Reorder and subset rows in covariates file to match expression matrix rows
 ## Also only keep first 3 genotype PCs and sex (if applicable)
 covs = covs[rownames(expr), ]
-remove.cols = paste0('C', 4:20)
+remove.cols = paste0('PC', 4:20) # did just say C so might have accidentally corrected for PC1-20 :(
 covs = covs[, !(colnames(covs) %in% remove.cols)]
 
 ## Read in PEER factors, fix subject names, and make column order match expression rows
@@ -61,6 +50,7 @@ expr = expr[inds_to_keep, ]
 ## Read in eQTL data for this tissue
 ## Restrict to the individuals with expression data for this tissue
 eqtl_calls = read.table(eqtl_call_file, sep = '\t', header = T) %>% select(Gene = gene_id, Chrom = chr, Pos = variant_pos, Qval = qval)
+eqtl_calls = eqtl_calls %>% filter(Qval <= 0.05) # testing effect of restricting to sig eQTLs
 eqtl_genos = as.data.frame(fread(eqtl_geno_file))
 
 eqtl_genos = eqtl_genos %>% select(c('Chrom', 'Pos', rownames(expr))) %>%

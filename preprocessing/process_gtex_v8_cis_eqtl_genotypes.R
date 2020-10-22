@@ -11,7 +11,7 @@ require(reshape2)
 require(plyr)
 
 baseDir = Sys.getenv('RAREDIR')
-dir = paste0(baseDir, '/preprocessing_v8')
+dir = paste0(baseDir, '/preprocessing_v8/eqtl_test')
 
 #--------------- FUNCTIONS
 
@@ -29,10 +29,10 @@ out = cbind(pos, genos)
 colnames(out) = c('Chrom', 'Pos', inds)
 
 # Remove duplicated positions
-out = out %>% mutate(ID = paste(Chrom, '_', Pos, sep = ''))
-ids = as.data.frame(table(out$ID))
-ids.to.keep = ids %>% filter(Freq == 1)
-out = out %>% filter(ID %in% ids.to.keep$Var1) %>% select(-ID)
+#out = out %>% mutate(ID = paste(Chrom, '_', Pos, sep = ''))
+#ids = as.data.frame(table(out$ID))
+#ids.to.keep = ids %>% filter(Freq == 1)
+#out = out %>% filter(ID %in% ids.to.keep$Var1) %>% select(-ID)
 
 # Write out the combined data frame
-write.table(out, paste(dir, '/gtex_2017-06-05_v8_genotypes_cis_eQTLs_012_processed.txt', sep = ''), sep = '\t', col.names = T, row.names = F, quote = F)
+write.table(out, paste(dir, '/gtex_2017-06-05_v8_genotypes_cis_eQTLs_012_processed_withdups.txt', sep = ''), sep = '\t', col.names = T, row.names = F, quote = F)

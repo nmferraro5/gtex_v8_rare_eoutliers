@@ -3,7 +3,7 @@
 ### Generate list of top eQTLs for each gene in each tissue
 
 zcat $GTEXv8/eqtl/GTEx_Analysis_v8_eQTL/*.v8.egenes.txt.gz | \
-        cut -f14-17 | grep -v variant_pos | sed 's/^X/23/g' | awk 'BEGIN{OFS="\t"}{print $1,$2-1,$2,$3,$4}' | sort -k 1,1 -k2,2n | \
+        cut -f14-17 | grep -v variant_pos | sed 's/^X/23/g' | awk 'BEGIN{OFS="\t"}{print $1,$2-1,$2,$3,$4}' | sort -k1,1V | \ #change sorting so it matches vcf i.e. chr1, chr2, etc.
         sed 's/^23/X/g' | uniq > $RAREDIR/preprocessing_v8/gtex_2017-06-05_v8_cis_eQTLs.bed
 
 wait

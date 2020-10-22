@@ -9,7 +9,8 @@ For GTEx v8 samples
 ### Split data by tissue
 ```
 OUT=${RAREDIR}/preprocessing_v8/PEER_v8
-GTEX=${GTEX_RNAv8}/GTEx_Analysis_2017-06-05_v8_RSEMv1.3.0_gene_tpm.gct.gz
+#GTEX=${GTEX_RNAv8}/GTEx_Analysis_2017-06-05_v8_RSEMv1.3.0_gene_tpm.gct.gz #old version
+GTEX=${GTEX_RNAv8}/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct.gz
 SAMPLE=${RAREDIR}/preprocessing_v8/gtex_2017-06-05_v8_samples_tissues.txt
 END='.tpm.txt'
 
