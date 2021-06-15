@@ -227,12 +227,10 @@ get.all.enrich <- function(outliers, feature_dir, counts = FALSE, scale = TRUE, 
         mafs = mafs[!(mafs == 'counts')] # removes counts dir, if there
     }
     vartypes = unique(list.dirs(paste0(feature_dir, '/', mafs), full.names = FALSE, recursive = FALSE))
-    #vartypes = vartypes[which(vartypes != 'HallLabSV')] # removing for v8
     if (!counts) {
         vartypes = vartypes[which(vartypes != 'HallLabSV')] # Remove SVs for features
     }
     vartypes = c('SNPs','HallLabSV') # adding to combine enrichments for SNPs+indels
-    #vartypes = c('SNPs')
     ## for all combinations of mafs and vartypes, merge features with outliers
     ## then collapse into a single data frame
     if (!counts) {
