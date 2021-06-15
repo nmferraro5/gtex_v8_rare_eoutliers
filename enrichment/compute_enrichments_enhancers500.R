@@ -135,7 +135,6 @@ for (ft in fdrs) {
     mutate(TissAny = ifelse(TissAny.sum > 0, 1, 0)) %>%
     top_n(1,Type) %>% ungroup()
   
-  ## try relative risk instead
   outliers = filter(knn.specific, Y == 1)
   controls = filter(knn.specific, Y == 0)
   outliers$Y = factor(outliers$Y, levels=c(0,1))
