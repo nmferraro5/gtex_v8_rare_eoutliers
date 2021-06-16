@@ -1,4 +1,4 @@
-GTEx v8 Outlier Analysis 
+GTEx v8 eOutlier Analysis 
 =====================================
 
 Setup
@@ -9,7 +9,7 @@ Then run to access the path variables:
 source <path to repo>/paths
 ```
 
-Then you can run the setup script with makes the basic directory structure for you:
+The setup script makes the basic directory structure:
 ```
 bash 0_setup.sh
 ```
