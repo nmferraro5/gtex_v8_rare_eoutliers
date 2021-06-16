@@ -50,47 +50,47 @@ ase_controls = filter(ase_data, value > 0.0027)
 risks = data.frame(Risk = numeric(), Lower = numeric(), Upper = numeric(), Pval = numeric(), St = character())
 vcats = unique(exp_data$variant_cat)
 ### Relative risk
-# for (vcat in vcats) {
-#   print(vcat)
-#   splice_nn = nrow(filter(splice_controls, variant_cat != vcat))
-#   splice_ny = nrow(filter(splice_controls, variant_cat == vcat))
-#   splice_yn = nrow(filter(splice_outliers, variant_cat != vcat))
-#   splice_yy = nrow(filter(splice_outliers, variant_cat == vcat))
-#   splicetable = rbind(c(splice_nn,splice_ny),c(splice_yn,splice_yy))
-#   srr = epitab(splicetable, method = 'riskratio')
-#   risks = rbind(risks, data.frame(Risk = srr$tab[2,5],
-#                                   Lower = srr$tab[2,6],
-#                                   Upper = srr$tab[2,7],
-#                                   Pval = srr$tab[2,8],
-#                                   Cat = vcat,
-#                                   Type = 'Splicing'))
-# 
-#   exp_nn = nrow(filter(exp_controls, variant_cat != vcat))
-#   exp_ny = nrow(filter(exp_controls, variant_cat == vcat))
-#   exp_yn = nrow(filter(exp_outliers, variant_cat != vcat))
-#   exp_yy = nrow(filter(exp_outliers, variant_cat == vcat))
-#   exptable = rbind(c(exp_nn,exp_ny),c(exp_yn,exp_yy))
-#   err = epitab(exptable, method = 'riskratio')
-#   risks = rbind(risks, data.frame(Risk = err$tab[2,5],
-#                                   Lower = err$tab[2,6],
-#                                   Upper = err$tab[2,7],
-#                                   Pval = err$tab[2,8],
-#                                   Cat = vcat,
-#                                   Type = 'Total expression'))
-#   
-#   ase_nn = nrow(filter(ase_controls, variant_cat != vcat))
-#   ase_ny = nrow(filter(ase_controls, variant_cat == vcat))
-#   ase_yn = nrow(filter(ase_outliers, variant_cat != vcat))
-#   ase_yy = nrow(filter(ase_outliers, variant_cat == vcat))
-#   asetable = rbind(c(ase_nn,ase_ny),c(ase_yn,ase_yy))
-#   arr = epitab(asetable, method = 'riskratio')
-#   risks = rbind(risks, data.frame(Risk = arr$tab[2,5],
-#                                   Lower = arr$tab[2,6],
-#                                   Upper = arr$tab[2,7],
-#                                   Pval = arr$tab[2,8],
-#                                   Cat = vcat,
-#                                   Type = 'ASE'))
-# }
+for (vcat in vcats) {
+  print(vcat)
+  splice_nn = nrow(filter(splice_controls, variant_cat != vcat))
+  splice_ny = nrow(filter(splice_controls, variant_cat == vcat))
+  splice_yn = nrow(filter(splice_outliers, variant_cat != vcat))
+  splice_yy = nrow(filter(splice_outliers, variant_cat == vcat))
+  splicetable = rbind(c(splice_nn,splice_ny),c(splice_yn,splice_yy))
+  srr = epitab(splicetable, method = 'riskratio')
+  risks = rbind(risks, data.frame(Risk = srr$tab[2,5],
+                                  Lower = srr$tab[2,6],
+                                  Upper = srr$tab[2,7],
+                                  Pval = srr$tab[2,8],
+                                  Cat = vcat,
+                                  Type = 'Splicing'))
+
+  exp_nn = nrow(filter(exp_controls, variant_cat != vcat))
+  exp_ny = nrow(filter(exp_controls, variant_cat == vcat))
+  exp_yn = nrow(filter(exp_outliers, variant_cat != vcat))
+  exp_yy = nrow(filter(exp_outliers, variant_cat == vcat))
+  exptable = rbind(c(exp_nn,exp_ny),c(exp_yn,exp_yy))
+  err = epitab(exptable, method = 'riskratio')
+  risks = rbind(risks, data.frame(Risk = err$tab[2,5],
+                                  Lower = err$tab[2,6],
+                                  Upper = err$tab[2,7],
+                                  Pval = err$tab[2,8],
+                                  Cat = vcat,
+                                  Type = 'Total expression'))
+  
+  ase_nn = nrow(filter(ase_controls, variant_cat != vcat))
+  ase_ny = nrow(filter(ase_controls, variant_cat == vcat))
+  ase_yn = nrow(filter(ase_outliers, variant_cat != vcat))
+  ase_yy = nrow(filter(ase_outliers, variant_cat == vcat))
+  asetable = rbind(c(ase_nn,ase_ny),c(ase_yn,ase_yy))
+  arr = epitab(asetable, method = 'riskratio')
+  risks = rbind(risks, data.frame(Risk = arr$tab[2,5],
+                                  Lower = arr$tab[2,6],
+                                  Upper = arr$tab[2,7],
+                                  Pval = arr$tab[2,8],
+                                  Cat = vcat,
+                                  Type = 'ASE'))
+}
 
 all_coefs = data.frame(Beta = numeric(), SE = numeric(), Zval = numeric(), Pval = numeric(), Category = character(), Variant = character())
 
@@ -115,9 +115,9 @@ for (vcat in vcats) {
   all_coefs = rbind(all_coefs, new_coefs)
 }
 
-# risks = risks %>% arrange(by=Risk) 
-# risks$Cat = factor(risks$Cat, levels=unique(risks$Cat))
-# risks$Type = factor(risks$Type, levels=c('ASE','Splicing', 'Total expression'))
+risks = risks %>% arrange(by=Risk) 
+risks$Cat = factor(risks$Cat, levels=unique(risks$Cat))
+risks$Type = factor(risks$Type, levels=c('ASE','Splicing', 'Total expression'))
 
 pcols = exp_data %>% filter(!(medz_bin %in% c(NA,"0.000~0.002"))) %>%
   group_by(variant_cat) %>% sample_n(1) %>%
@@ -126,6 +126,6 @@ pcols = exp_data %>% filter(!(medz_bin %in% c(NA,"0.000~0.002"))) %>%
 plot_cols = c(pcols$CatCol[1:11],'#3e6690','#33669a',pcols$CatCol[14:16])
 names(plot_cols) = unique(pcols$variant_cat)
 
-#save(risks, plot_cols, file=paste0(data_dir, 'gtexV8.relative.risks.all.types.RData'))
+save(risks, plot_cols, file=paste0(data_dir, 'gtexV8.relative.risks.all.types.RData'))
 save(all_coefs, plot_cols, file=paste0(data_dir, 'gtexV8.continuous.risks.all.types.RData'))
 
